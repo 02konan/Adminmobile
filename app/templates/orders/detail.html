@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Commande {{ order.order_number }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Commande {{ order.order_number }}</h1>
+  <a class="btn btn-outline-secondary" href="{{ url_for('orders.list_orders') }}">
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">Articles</div>
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Variante</th>
+              <th>Prix unitaire</th>
+              <th>Quantité</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td>{{ item.product_name }}</td>
+              <td>
+                {{ item.selected_color or '' }}
+                {% if item.selected_size %}<span class="text-muted">Taille {{ item.selected_size }}</span>{% endif %}
+              </td>
+              <td>{{ m.price(item.unit_price) }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ m.price(item.unit_price * item.quantity) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Récapitulatif</div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between"><span>Sous-total</span><span>{{ m.price(order.subtotal) }}</span></div>
+        <div class="d-flex justify-content-between"><span>Livraison</span><span>{{ m.price(order.shipping_cost) }}</span></div>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>{{ m.price(order.total) }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">Client</div>
+      <div class="card-body">
+        <p class="mb-1"><strong>{{ order.user_name }}</strong></p>
+        <p class="mb-1 text-muted">{{ order.user_email }}</p>
+        {% if order.user_phone %}<p class="mb-0 text-muted">{{ order.user_phone }}</p>{% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">Livraison</div>
+      <div class="card-body">
+        <p class="mb-0">{{ order.shipping_address }}</p>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Statut</div>
+      <div class="card-body">
+        <p>Actuel : {{ m.status_badge(order.status) }}</p>
+        <form method="post" action="{{ url_for('orders.update_status', order_id=order.id) }}" class="d-flex gap-2">
+          <select class="form-select" name="status">
+            <option value="processing" {{ 'selected' if order.status == 'processing' }}>En traitement</option>
+            <option value="shipped" {{ 'selected' if order.status == 'shipped' }}>Expédiée</option>
+            <option value="delivered" {{ 'selected' if order.status == 'delivered' }}>Livrée</option>
+          </select>
+          <button class="btn btn-dark" type="submit">OK</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

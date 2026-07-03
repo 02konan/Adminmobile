@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifier' if product else 'Ajouter' }} un produit{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">{{ 'Modifier' if product else 'Ajouter' }} un produit{% if product %} — {{ product.id }}{% endif %}</h1>
+
+<form method="post" class="card shadow-sm p-4">
+  <div class="row g-3">
+    <div class="col-md-8">
+      <label class="form-label" for="name">Nom</label>
+      <input class="form-control" type="text" id="name" name="name" required
+             value="{{ product.name if product else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="category_id">Catégorie</label>
+      <select class="form-select" id="category_id" name="category_id" required>
+        {% for c in categories %}
+          <option value="{{ c.id }}" {{ 'selected' if product and product.category_id == c.id }}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label" for="description">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="3">{{ product.description if product else '' }}</textarea>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label" for="price">Prix (€)</label>
+      <input class="form-control" type="text" id="price" name="price" required
+             value="{{ product.price if product else '' }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="old_price">Ancien prix (€, optionnel)</label>
+      <input class="form-control" type="text" id="old_price" name="old_price"
+             value="{{ product.old_price if product and product.old_price else '' }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="stock">Stock</label>
+      <input class="form-control" type="number" min="0" id="stock" name="stock"
+             value="{{ product.stock if product else 10 }}">
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured"
+               {{ 'checked' if product and product.is_featured }}>
+        <label class="form-check-label" for="is_featured">Mis en avant</label>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label" for="image_url">URL de l'image</label>
+      <input class="form-control" type="text" id="image_url" name="image_url"
+             value="{{ product.image_url if product else '' }}">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="colors">Couleurs <span class="text-muted small">(séparées par des virgules)</span></label>
+      <input class="form-control" type="text" id="colors" name="colors" value="{{ colors }}" placeholder="Noir, Blanc, Bleu">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="sizes">Tailles <span class="text-muted small">(séparées par des virgules)</span></label>
+      <input class="form-control" type="text" id="sizes" name="sizes" value="{{ sizes }}" placeholder="S, M, L, XL">
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+    <button class="btn btn-dark" type="submit">Enregistrer</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('products.list_products') }}">Annuler</a>
+  </div>
+</form>
+{% endblock %}

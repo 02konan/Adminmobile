@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Commandes{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Commandes</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-4 col-md-3">
+    <select class="form-select" name="status" onchange="this.form.submit()">
+      <option value="">Tous les statuts</option>
+      <option value="processing" {{ 'selected' if selected_status == 'processing' }}>En traitement</option>
+      <option value="shipped" {{ 'selected' if selected_status == 'shipped' }}>Expédiée</option>
+      <option value="delivered" {{ 'selected' if selected_status == 'delivered' }}>Livrée</option>
+    </select>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Numéro</th>
+          <th>Client</th>
+          <th>Total</th>
+          <th>Paiement</th>
+          <th>Statut</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr class="clickable-row" onclick="window.location='{{ url_for('orders.detail', order_id=o.id) }}'">
+          <td>{{ o.order_number }}</td>
+          <td>{{ o.user_name }}<div class="text-muted small">{{ o.user_email }}</div></td>
+          <td>{{ m.price(o.total) }}</td>
+          <td class="text-capitalize">{{ o.payment_method }}</td>
+          <td>{{ m.status_badge(o.status) }}</td>
+          <td>{{ o.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Aucune commande.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

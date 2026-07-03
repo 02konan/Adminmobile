@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Produits{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Produits</h1>
+  <a class="btn btn-dark" href="{{ url_for('products.new_product') }}">
+    <i class="bi bi-plus-lg"></i> Ajouter un produit
+  </a>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-6 col-md-4">
+    <input class="form-control" type="text" name="q" placeholder="Rechercher par nom ou id..." value="{{ search }}">
+  </div>
+  <div class="col-sm-4 col-md-3">
+    <select class="form-select" name="category">
+      <option value="">Toutes les catégories</option>
+      {% for c in categories %}
+        <option value="{{ c.id }}" {{ 'selected' if c.id == selected_category }}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-2">
+    <button class="btn btn-outline-secondary" type="submit">Filtrer</button>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th></th>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Catégorie</th>
+          <th>Prix</th>
+          <th>Stock</th>
+          <th>Mis en avant</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td><img class="product-thumb" src="{{ p.image_url }}" alt="" onerror="this.style.visibility='hidden'"></td>
+          <td><code>{{ p.id }}</code></td>
+          <td>{{ p.name }}</td>
+          <td>{{ p.category_name }}</td>
+          <td>
+            {{ m.price(p.price) }}
+            {% if p.old_price %}<span class="text-muted text-decoration-line-through small ms-1">{{ m.price(p.old_price) }}</span>{% endif %}
+          </td>
+          <td>
+            <span class="badge text-bg-{{ 'danger' if p.stock <= 5 else 'light text-dark' }}">{{ p.stock }}</span>
+          </td>
+          <td>{% if p.is_featured %}<i class="bi bi-star-fill text-warning"></i>{% endif %}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('products.edit_product', product_id=p.id) }}">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form class="d-inline" method="post" action="{{ url_for('products.delete_product', product_id=p.id) }}"
+                  onsubmit="return confirm('Supprimer {{ p.name }} ?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">Aucun produit trouvé.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

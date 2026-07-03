@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Catégories{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Catégories</h1>
+  <a class="btn btn-dark" href="{{ url_for('categories.new_category') }}">
+    <i class="bi bi-plus-lg"></i> Ajouter une catégorie
+  </a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Icône</th>
+          <th>Produits</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in categories %}
+        <tr>
+          <td><code>{{ c.id }}</code></td>
+          <td>{{ c.name }}</td>
+          <td><span class="badge text-bg-light text-dark">{{ icons.get(c.icon, c.icon) }}</span></td>
+          <td>{{ c.product_count }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('categories.edit_category', category_id=c.id) }}">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form class="d-inline" method="post" action="{{ url_for('categories.delete_category', category_id=c.id) }}"
+                  onsubmit="return confirm('Supprimer {{ c.name }} ?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-4">Aucune catégorie.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

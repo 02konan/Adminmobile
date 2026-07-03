@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifier' if category else 'Ajouter' }} une catégorie{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">{{ 'Modifier' if category else 'Ajouter' }} une catégorie{% if category %} — {{ category.id }}{% endif %}</h1>
+
+<form method="post" class="card shadow-sm p-4" style="max-width: 500px;">
+  <div class="mb-3">
+    <label class="form-label" for="name">Nom</label>
+    <input class="form-control" type="text" id="name" name="name" required
+           value="{{ category.name if category else '' }}">
+    {% if not category %}
+      <div class="form-text">L'identifiant sera généré automatiquement à partir du nom.</div>
+    {% endif %}
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label" for="icon">Icône</label>
+    <select class="form-select" id="icon" name="icon" required>
+      {% for value, label in icons %}
+        <option value="{{ value }}" {{ 'selected' if category and category.icon == value }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <div class="form-text">Doit correspondre à une icône reconnue par l'application mobile.</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-dark" type="submit">Enregistrer</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('categories.list_categories') }}">Annuler</a>
+  </div>
+</form>
+{% endblock %}

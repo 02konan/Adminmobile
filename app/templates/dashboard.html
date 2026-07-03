@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Tableau de bord</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="card text-center shadow-sm">
+      <div class="card-body">
+        <div class="fs-3 fw-bold">{{ stats.products }}</div>
+        <div class="text-muted small">Produits</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="card text-center shadow-sm">
+      <div class="card-body">
+        <div class="fs-3 fw-bold">{{ stats.categories }}</div>
+        <div class="text-muted small">Catégories</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="card text-center shadow-sm">
+      <div class="card-body">
+        <div class="fs-3 fw-bold">{{ stats.orders }}</div>
+        <div class="text-muted small">Commandes</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="card text-center shadow-sm">
+      <div class="card-body">
+        <div class="fs-3 fw-bold">{{ stats.users }}</div>
+        <div class="text-muted small">Clients</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="card text-center shadow-sm">
+      <div class="card-body">
+        <div class="fs-3 fw-bold">{{ m.price(stats.revenue) }}</div>
+        <div class="text-muted small">Chiffre d'affaires</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="card text-center shadow-sm {{ 'border-danger' if stats.low_stock > 0 }}">
+      <div class="card-body">
+        <div class="fs-3 fw-bold {{ 'text-danger' if stats.low_stock > 0 }}">{{ stats.low_stock }}</div>
+        <div class="text-muted small">Stock faible (≤5)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Dernières commandes</span>
+    <a href="{{ url_for('orders.list_orders') }}" class="btn btn-sm btn-outline-secondary">Voir tout</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Numéro</th>
+          <th>Client</th>
+          <th>Total</th>
+          <th>Statut</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in recent_orders %}
+        <tr class="clickable-row" onclick="window.location='{{ url_for('orders.detail', order_id=order.id)}}'">
+          <td>{{ order.order_number }}</td>
+          <td>{{ order.user_name }}</td>
+          <td>{{ m.price(order.total) }}</td>
+          <td>{{ m.status_badge(order.status) }}</td>
+          <td>{{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-3">Aucune commande pour le moment.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Utilisateurs{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Utilisateurs</h1>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>E-mail</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th>Commandes</th>
+          <th>Total dépensé</th>
+          <th>Inscrit le</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.phone or '—' }}</td>
+          <td>{{ u.address or '—' }}</td>
+          <td>{{ u.order_count }}</td>
+          <td>{{ m.price(u.total_spent) }}</td>
+          <td>{{ u.created_at.strftime('%d/%m/%Y') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">Aucun utilisateur.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
