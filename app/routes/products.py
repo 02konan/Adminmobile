@@ -18,16 +18,22 @@ def _split_variants(raw):
     return [v.strip() for v in raw.split(",") if v.strip()]
 
 
+def _shops():
+    return query("SELECT id, name FROM shops ORDER BY name")
+
+
 @products_bp.route("/")
 @login_required
 def list_products():
     search = request.args.get("q", "").strip()
     category_id = request.args.get("category", "").strip()
+    shop_filter = request.args.get("shop", "").strip()
 
     sql = """
-        SELECT p.*, c.name AS category_name
+        SELECT p.*, c.name AS category_name, s.name AS shop_name
         FROM products p
         JOIN categories c ON c.id = p.category_id
+        LEFT JOIN shops s ON s.id = p.shop_id
         WHERE 1=1
     """
     params = []
@@ -37,17 +43,29 @@ def list_products():
     if category_id:
         sql += " AND p.category_id = %s"
         params.append(category_id)
+    if shop_filter == "none":
+        sql += " AND p.shop_id IS NULL"
+    elif shop_filter:
+        sql += " AND p.shop_id = %s"
+        params.append(shop_filter)
     sql += " ORDER BY p.name"
 
     products = query(sql, params)
     categories = query("SELECT id, name FROM categories ORDER BY name")
+    shops = _shops()
+    orphan_count = query(
+        "SELECT COUNT(*) AS n FROM products WHERE shop_id IS NULL", fetchone=True
+    )["n"]
 
     return render_template(
         "products/list.html",
         products=products,
         categories=categories,
+        shops=shops,
+        orphan_count=orphan_count,
         search=search,
         selected_category=category_id,
+        selected_shop=shop_filter,
     )
 
 
@@ -61,7 +79,12 @@ def new_product():
         return redirect(url_for("products.list_products"))
 
     return render_template(
-        "products/form.html", product=None, categories=categories, colors="", sizes=""
+        "products/form.html",
+        product=None,
+        categories=categories,
+        shops=_shops(),
+        colors="",
+        sizes="",
     )
 
 
@@ -92,7 +115,12 @@ def edit_product(product_id):
     )
 
     return render_template(
-        "products/form.html", product=product, categories=categories, colors=colors, sizes=sizes
+        "products/form.html",
+        product=product,
+        categories=categories,
+        shops=_shops(),
+        colors=colors,
+        sizes=sizes,
     )
 
 
@@ -118,6 +146,16 @@ def _save_product(product_id, categories):
         flash("Prix invalide.", "danger")
         return
 
+    # Boutique (optionnelle) : vide -> NULL. Validée contre les boutiques existantes.
+    shop_raw = form.get("shop_id", "").strip()
+    shop_id = None
+    if shop_raw:
+        valid = query("SELECT id FROM shops WHERE id = %s", [shop_raw], fetchone=True)
+        if valid is None:
+            flash("Boutique invalide.", "danger")
+            return
+        shop_id = int(shop_raw)
+
     fields = {
         "category_id": category_id,
         "name": name,
@@ -127,6 +165,7 @@ def _save_product(product_id, categories):
         "image_url": form.get("image_url", "").strip(),
         "stock": int(form.get("stock") or 0),
         "is_featured": 1 if form.get("is_featured") == "on" else 0,
+        "shop_id": shop_id,
     }
 
     db = get_db()
@@ -136,13 +175,14 @@ def _save_product(product_id, categories):
             cursor.execute(
                 """
                 INSERT INTO products
-                    (id, category_id, name, description, price, old_price,
+                    (id, category_id, shop_id, name, description, price, old_price,
                      image_url, stock, is_featured, rating, review_count)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0, 0)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 0, 0)
                 """,
                 [
                     product_id,
                     fields["category_id"],
+                    fields["shop_id"],
                     fields["name"],
                     fields["description"],
                     fields["price"],
@@ -156,12 +196,13 @@ def _save_product(product_id, categories):
             cursor.execute(
                 """
                 UPDATE products
-                SET category_id=%s, name=%s, description=%s, price=%s, old_price=%s,
-                    image_url=%s, stock=%s, is_featured=%s
+                SET category_id=%s, shop_id=%s, name=%s, description=%s, price=%s,
+                    old_price=%s, image_url=%s, stock=%s, is_featured=%s
                 WHERE id=%s
                 """,
                 [
                     fields["category_id"],
+                    fields["shop_id"],
                     fields["name"],
                     fields["description"],
                     fields["price"],
@@ -194,4 +235,22 @@ def _save_product(product_id, categories):
 def delete_product(product_id):
     execute("DELETE FROM products WHERE id = %s", [product_id])
     flash("Produit supprimé.", "success")
+    return redirect(url_for("products.list_products"))
+
+
+@products_bp.route("/assign-shop", methods=["POST"])
+@login_required
+def assign_shop():
+    """Rattache en masse les produits sans boutique à une boutique donnée."""
+    shop_id = request.form.get("shop_id", "").strip()
+    if not shop_id or query(
+        "SELECT id FROM shops WHERE id = %s", [shop_id], fetchone=True
+    ) is None:
+        flash("Boutique invalide.", "danger")
+        return redirect(url_for("products.list_products"))
+
+    affected = execute(
+        "UPDATE products SET shop_id = %s WHERE shop_id IS NULL", [shop_id]
+    )
+    flash(f"{affected} produit(s) rattaché(s) à la boutique.", "success")
     return redirect(url_for("products.list_products"))
