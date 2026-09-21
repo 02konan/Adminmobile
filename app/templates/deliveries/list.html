@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Livraisons{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Livraisons</h1>
+
+{% if ready_orders %}
+<div class="card shadow-sm mb-4 border-warning">
+  <div class="card-header bg-warning-subtle">
+    <i class="bi bi-exclamation-triangle"></i> Commandes prêtes à affecter ({{ ready_orders|length }})
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+      <thead><tr><th>N°</th><th>Boutique</th><th>Adresse</th><th>Total</th><th style="width:320px">Affecter un livreur</th></tr></thead>
+      <tbody>
+        {% for o in ready_orders %}
+        <tr>
+          <td>{{ o.order_number }}</td>
+          <td>{{ o.shop_name or '—' }}</td>
+          <td class="small">{{ o.shipping_address }}</td>
+          <td>{{ m.price(o.total) }}</td>
+          <td>
+            <form method="post" action="{{ url_for('deliveries.assign') }}" class="d-flex gap-2">
+              <input type="hidden" name="order_id" value="{{ o.id }}">
+              <select class="form-select form-select-sm" name="driver_id" required>
+                <option value="">Choisir…</option>
+                {% for d in drivers %}<option value="{{ d.id }}">{{ d.name }}</option>{% endfor %}
+              </select>
+              <button class="btn btn-sm btn-success text-nowrap" {{ 'disabled' if not drivers }}>Affecter</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-4 col-md-3">
+    <select class="form-select" name="status" onchange="this.form.submit()">
+      <option value="">Tous les statuts</option>
+      <option value="assigned" {{ 'selected' if selected_status == 'assigned' }}>Affectées</option>
+      <option value="picked_up" {{ 'selected' if selected_status == 'picked_up' }}>Récupérées</option>
+      <option value="delivering" {{ 'selected' if selected_status == 'delivering' }}>En livraison</option>
+      <option value="delivered" {{ 'selected' if selected_status == 'delivered' }}>Livrées</option>
+      <option value="failed" {{ 'selected' if selected_status == 'failed' }}>Échouées</option>
+    </select>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Commande</th>
+          <th>Boutique</th>
+          <th>Livreur</th>
+          <th>Adresse</th>
+          <th>Total</th>
+          <th>Statut</th>
+          <th style="width:220px">Changer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in deliveries %}
+        <tr>
+          <td class="fw-semibold">{{ d.order_number }}</td>
+          <td>{{ d.shop_name or '—' }}</td>
+          <td>{{ d.driver_name or '—' }}<div class="text-muted small">{{ d.driver_phone or '' }}</div></td>
+          <td class="small">{{ d.shipping_address }}</td>
+          <td>{{ m.price(d.total) }}</td>
+          <td>{{ m.delivery_badge(d.status) }}</td>
+          <td>
+            <form method="post" action="{{ url_for('deliveries.update_status', delivery_id=d.id) }}" class="d-flex gap-1">
+              <select class="form-select form-select-sm" name="status">
+                {% for st, lbl in [('assigned','Affectée'),('picked_up','Récupérée'),('delivering','En livraison'),('delivered','Livrée'),('failed','Échouée')] %}
+                <option value="{{ st }}" {{ 'selected' if d.status == st }}>{{ lbl }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-sm btn-outline-primary">OK</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">Aucune livraison.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

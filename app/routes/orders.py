@@ -5,7 +5,17 @@ from ..db import execute, query
 
 orders_bp = Blueprint("orders", __name__, url_prefix="/orders")
 
-VALID_STATUSES = ("processing", "shipped", "delivered")
+VALID_STATUSES = (
+    "pending",
+    "confirmed",
+    "preparing",
+    "ready",
+    "picked_up",
+    "delivering",
+    "delivered",
+    "refused",
+    "cancelled",
+)
 
 
 @orders_bp.route("/")

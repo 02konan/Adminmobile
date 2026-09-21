@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}{{ live.title }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">{{ live.title }} {{ m.live_badge(live.status) }}</h1>
+  <a href="{{ url_for('lives.list_lives') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Informations</h5>
+        <dl class="row mb-0 small">
+          <dt class="col-5 text-muted">Boutique</dt><dd class="col-7">{{ live.shop_name }}</dd>
+          <dt class="col-5 text-muted">Catégorie</dt><dd class="col-7">{{ live.category or '—' }}</dd>
+          <dt class="col-5 text-muted">Vues</dt><dd class="col-7">{{ live.viewer_count }}</dd>
+          <dt class="col-5 text-muted">Commandes</dt><dd class="col-7">{{ orders_count }}</dd>
+        </dl>
+        {% if live.description %}<p class="text-muted small mt-2 mb-0">{{ live.description }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">Produits présentés ({{ products|length }})</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0 align-middle">
+          <thead><tr><th>Nom</th><th>Prix</th></tr></thead>
+          <tbody>
+            {% for p in products %}
+            <tr><td>{{ p.name }}</td><td>{{ m.price(p.price) }}</td></tr>
+            {% else %}
+            <tr><td colspan="2" class="text-center text-muted py-3">Aucun produit.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Derniers messages du chat ({{ messages|length }})</div>
+      <ul class="list-group list-group-flush">
+        {% for msg in messages %}
+        <li class="list-group-item py-2">
+          <span class="fw-semibold text-primary">{{ msg.user_name }}</span>
+          <span class="ms-1">{{ msg.message }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-center text-muted py-3">Aucun message.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

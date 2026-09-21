@@ -1,7 +1,51 @@
+{# ---- Prix en francs CFA (DIVIX) ---- #}
+{% macro price(value) %}{{ '{:,.0f}'.format(value|float).replace(',', ' ') }} FCFA{% endmacro %}
+
+{# ---- Statut de commande (workflow DIVIX) ---- #}
 {% macro status_badge(status) %}
-  {% set colors = {'processing': 'warning', 'shipped': 'info', 'delivered': 'success'} %}
-  {% set labels = {'processing': 'En traitement', 'shipped': 'Expédiée', 'delivered': 'Livrée'} %}
+  {% set colors = {
+    'pending': 'warning', 'confirmed': 'info', 'preparing': 'info',
+    'ready': 'primary', 'picked_up': 'primary', 'delivering': 'primary',
+    'delivered': 'success', 'refused': 'danger', 'cancelled': 'secondary'
+  } %}
+  {% set labels = {
+    'pending': 'En attente', 'confirmed': 'Confirmée', 'preparing': 'En préparation',
+    'ready': 'Prête', 'picked_up': 'Récupérée', 'delivering': 'En livraison',
+    'delivered': 'Livrée', 'refused': 'Refusée', 'cancelled': 'Annulée'
+  } %}
   <span class="badge text-bg-{{ colors.get(status, 'secondary') }}">{{ labels.get(status, status) }}</span>
 {% endmacro %}
 
-{% macro price(value) %}{{ '%.2f'|format(value|float) }} €{% endmacro %}
+{# ---- Statut de livraison ---- #}
+{% macro delivery_badge(status) %}
+  {% set colors = {
+    'unassigned': 'secondary', 'assigned': 'warning', 'picked_up': 'info',
+    'delivering': 'primary', 'delivered': 'success', 'failed': 'danger'
+  } %}
+  {% set labels = {
+    'unassigned': 'À affecter', 'assigned': 'Affectée', 'picked_up': 'Récupérée',
+    'delivering': 'En livraison', 'delivered': 'Livrée', 'failed': 'Échouée'
+  } %}
+  <span class="badge text-bg-{{ colors.get(status, 'secondary') }}">{{ labels.get(status, status or '—') }}</span>
+{% endmacro %}
+
+{# ---- Statut de boutique ---- #}
+{% macro shop_badge(status) %}
+  {% set colors = {'pending': 'warning', 'validated': 'success', 'suspended': 'danger'} %}
+  {% set labels = {'pending': 'En attente', 'validated': 'Validée', 'suspended': 'Suspendue'} %}
+  <span class="badge text-bg-{{ colors.get(status, 'secondary') }}">{{ labels.get(status, status) }}</span>
+{% endmacro %}
+
+{# ---- Statut de live ---- #}
+{% macro live_badge(status) %}
+  {% set colors = {'scheduled': 'info', 'live': 'danger', 'ended': 'secondary'} %}
+  {% set labels = {'scheduled': 'Programmé', 'live': 'En direct', 'ended': 'Terminé'} %}
+  <span class="badge text-bg-{{ colors.get(status, 'secondary') }}">{{ labels.get(status, status) }}</span>
+{% endmacro %}
+
+{# ---- Statut de signalement ---- #}
+{% macro report_badge(status) %}
+  {% set colors = {'open': 'danger', 'reviewing': 'warning', 'resolved': 'success', 'dismissed': 'secondary'} %}
+  {% set labels = {'open': 'Ouvert', 'reviewing': 'En cours', 'resolved': 'Résolu', 'dismissed': 'Rejeté'} %}
+  <span class="badge text-bg-{{ colors.get(status, 'secondary') }}">{{ labels.get(status, status) }}</span>
+{% endmacro %}

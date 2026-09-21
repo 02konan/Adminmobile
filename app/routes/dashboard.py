@@ -9,17 +9,32 @@ dashboard_bp = Blueprint("dashboard", __name__)
 @dashboard_bp.route("/")
 @login_required
 def index():
+    def count(sql):
+        return query(sql, fetchone=True)["n"]
+
     stats = {
-        "products": query("SELECT COUNT(*) AS n FROM products", fetchone=True)["n"],
-        "categories": query("SELECT COUNT(*) AS n FROM categories", fetchone=True)["n"],
-        "orders": query("SELECT COUNT(*) AS n FROM orders", fetchone=True)["n"],
-        "users": query("SELECT COUNT(*) AS n FROM users", fetchone=True)["n"],
+        "products": count("SELECT COUNT(*) AS n FROM products"),
+        "orders": count("SELECT COUNT(*) AS n FROM orders"),
+        "users": count("SELECT COUNT(*) AS n FROM users"),
         "revenue": query(
-            "SELECT COALESCE(SUM(total), 0) AS total FROM orders", fetchone=True
+            "SELECT COALESCE(SUM(total), 0) AS total FROM orders "
+            "WHERE status = 'delivered'",
+            fetchone=True,
         )["total"],
-        "low_stock": query(
-            "SELECT COUNT(*) AS n FROM products WHERE stock <= 5", fetchone=True
-        )["n"],
+        "shops": count("SELECT COUNT(*) AS n FROM shops"),
+        "pending_shops": count(
+            "SELECT COUNT(*) AS n FROM shops WHERE status = 'pending'"
+        ),
+        "live_now": count("SELECT COUNT(*) AS n FROM lives WHERE status = 'live'"),
+        "drivers": count("SELECT COUNT(*) AS n FROM users WHERE role = 'driver'"),
+        "active_deliveries": count(
+            "SELECT COUNT(*) AS n FROM deliveries "
+            "WHERE status IN ('assigned','picked_up','delivering')"
+        ),
+        "open_reports": count(
+            "SELECT COUNT(*) AS n FROM reports WHERE status = 'open'"
+        ),
+        "low_stock": count("SELECT COUNT(*) AS n FROM products WHERE stock <= 5"),
     }
 
     recent_orders = query(
