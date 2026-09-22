@@ -3,6 +3,7 @@ from flask import Flask, redirect, url_for
 from . import db
 from .auth import auth_bp
 from .config import Config
+from .routes.admins import admins_bp
 from .routes.categories import categories_bp
 from .routes.dashboard import dashboard_bp
 from .routes.deliveries import deliveries_bp
@@ -32,6 +33,7 @@ def create_app(config_class=Config):
     app.register_blueprint(reports_bp)
     app.register_blueprint(stats_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(admins_bp)
 
     @app.context_processor
     def inject_badges():

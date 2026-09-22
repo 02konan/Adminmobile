@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Administrateurs{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Administrateurs</h1>
+  <a class="btn btn-dark" href="{{ url_for('admins.new_admin') }}">
+    <i class="bi bi-person-plus"></i> Ajouter un administrateur
+  </a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Identifiant</th>
+          <th>Nom</th>
+          <th>Statut</th>
+          <th>Créé le</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in admins %}
+        <tr>
+          <td>
+            <code>{{ a.username }}</code>
+            {% if a.id == current_id %}<span class="badge text-bg-info ms-1">vous</span>{% endif %}
+          </td>
+          <td>{{ a.name or '—' }}</td>
+          <td>
+            {% if a.is_active %}<span class="badge text-bg-success">Actif</span>
+            {% else %}<span class="badge text-bg-secondary">Désactivé</span>{% endif %}
+          </td>
+          <td class="small">{{ a.created_at.strftime('%d/%m/%Y') if a.created_at else '' }}</td>
+          <td class="text-end">
+            <div class="d-inline-flex gap-1">
+              <!-- Réinitialiser le mot de passe -->
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                      data-bs-target="#pwd-{{ a.id }}" title="Réinitialiser le mot de passe">
+                <i class="bi bi-key"></i>
+              </button>
+              <!-- Activer / désactiver -->
+              {% if a.id != current_id %}
+              <form method="post" action="{{ url_for('admins.toggle_active', admin_id=a.id) }}" class="d-inline">
+                <button class="btn btn-sm btn-outline-{{ 'warning' if a.is_active else 'success' }}"
+                        title="{{ 'Désactiver' if a.is_active else 'Activer' }}">
+                  <i class="bi bi-{{ 'pause-circle' if a.is_active else 'play-circle' }}"></i>
+                </button>
+              </form>
+              <!-- Supprimer -->
+              <form method="post" action="{{ url_for('admins.delete_admin', admin_id=a.id) }}" class="d-inline"
+                    onsubmit="return confirm('Supprimer l’administrateur {{ a.username }} ?');">
+                <button class="btn btn-sm btn-outline-danger" title="Supprimer"><i class="bi bi-trash"></i></button>
+              </form>
+              {% endif %}
+            </div>
+            <!-- Ligne repliable : nouveau mot de passe -->
+            <div class="collapse mt-2" id="pwd-{{ a.id }}">
+              <form method="post" action="{{ url_for('admins.reset_password', admin_id=a.id) }}"
+                    class="d-flex gap-2 justify-content-end">
+                <input class="form-control form-control-sm" style="max-width:220px" type="password"
+                       name="password" placeholder="Nouveau mot de passe (min. 6)" required minlength="6">
+                <button class="btn btn-sm btn-primary text-nowrap">Enregistrer</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-4">Aucun administrateur.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-3">
+  <i class="bi bi-info-circle"></i>
+  Vous ne pouvez pas désactiver ou supprimer votre propre compte ni le dernier administrateur actif (protection contre le verrouillage).
+</p>
+{% endblock %}
