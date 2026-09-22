@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Nouvel administrateur{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Ajouter un administrateur</h1>
+
+<form method="post" class="card shadow-sm p-4" style="max-width:560px">
+  <div class="mb-3">
+    <label class="form-label" for="username">Identifiant</label>
+    <input class="form-control" type="text" id="username" name="username" required autofocus
+           placeholder="ex. awa">
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="name">Nom (optionnel)</label>
+    <input class="form-control" type="text" id="name" name="name" placeholder="ex. Awa Koné">
+  </div>
+  <div class="mb-3">
+    <label class="form-label" for="password">Mot de passe</label>
+    <input class="form-control" type="password" id="password" name="password" required minlength="6"
+           placeholder="au moins 6 caractères">
+    <div class="form-text">Le mot de passe est stocké de façon sécurisée (haché), jamais en clair.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-dark" type="submit">Créer</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('admins.list_admins') }}">Annuler</a>
+  </div>
+</form>
+{% endblock %}

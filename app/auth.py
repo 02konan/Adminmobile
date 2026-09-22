@@ -2,7 +2,6 @@ from functools import wraps
 
 from flask import (
     Blueprint,
-    current_app,
     flash,
     redirect,
     render_template,
@@ -11,6 +10,8 @@ from flask import (
     url_for,
 )
 from werkzeug.security import check_password_hash
+
+from . import admin_accounts
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -31,19 +32,18 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
-        expected_username = current_app.config["ADMIN_USERNAME"]
-        expected_hash = current_app.config["ADMIN_PASSWORD_HASH"]
-
-        valid = (
-            expected_hash
-            and username == expected_username
-            and check_password_hash(expected_hash, password)
+        admin_accounts.ensure_ready()
+        admin = admin_accounts.get_by_username(username)
+        valid = admin is not None and check_password_hash(
+            admin["password_hash"], password
         )
 
         if valid:
             session.clear()
             session["admin_logged_in"] = True
-            session["admin_username"] = username
+            session["admin_id"] = admin["id"]
+            session["admin_username"] = admin["username"]
+            session["admin_name"] = admin["name"] or admin["username"]
             next_url = request.form.get("next") or url_for("dashboard.index")
             return redirect(next_url)
 
