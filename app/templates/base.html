@@ -41,6 +41,32 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'shops' }}" href="{{ url_for('shops.list_shops') }}">
+            <i class="bi bi-shop-window"></i> Boutiques
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'lives' }}" href="{{ url_for('lives.list_lives') }}">
+            <i class="bi bi-broadcast"></i> Lives
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'deliveries' }}" href="{{ url_for('deliveries.list_deliveries') }}">
+            <i class="bi bi-truck"></i> Livraisons
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'reports' }}" href="{{ url_for('reports.list_reports') }}">
+            <i class="bi bi-flag"></i> Signalements
+            {% if open_reports_count %}<span class="badge text-bg-danger rounded-pill">{{ open_reports_count }}</span>{% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'stats' }}" href="{{ url_for('stats.index') }}">
+            <i class="bi bi-graph-up"></i> Statistiques
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'users' }}" href="{{ url_for('users.list_users') }}">
             <i class="bi bi-people"></i> Utilisateurs
           </a>

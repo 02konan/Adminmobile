@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Boutiques{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Boutiques</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-4 col-md-3">
+    <select class="form-select" name="status" onchange="this.form.submit()">
+      <option value="">Tous les statuts</option>
+      <option value="pending" {{ 'selected' if selected_status == 'pending' }}>En attente</option>
+      <option value="validated" {{ 'selected' if selected_status == 'validated' }}>Validées</option>
+      <option value="suspended" {{ 'selected' if selected_status == 'suspended' }}>Suspendues</option>
+    </select>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Boutique</th>
+          <th>Propriétaire</th>
+          <th>Commune</th>
+          <th class="text-center">Produits</th>
+          <th class="text-center">Lives</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in shops %}
+        <tr class="clickable-row" onclick="window.location='{{ url_for('shops.detail', shop_id=s.id) }}'">
+          <td class="fw-semibold">{{ s.name }}</td>
+          <td>{{ s.owner_name }}<div class="text-muted small">{{ s.owner_phone or '' }}</div></td>
+          <td>{{ s.commune or '—' }}</td>
+          <td class="text-center">{{ s.product_count }}</td>
+          <td class="text-center">{{ s.live_count }}</td>
+          <td>{{ m.shop_badge(s.status) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Aucune boutique.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

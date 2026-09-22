@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Signalements{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Signalements</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-4 col-md-3">
+    <select class="form-select" name="status" onchange="this.form.submit()">
+      <option value="">Tous les statuts</option>
+      <option value="open" {{ 'selected' if selected_status == 'open' }}>Ouverts</option>
+      <option value="reviewing" {{ 'selected' if selected_status == 'reviewing' }}>En cours</option>
+      <option value="resolved" {{ 'selected' if selected_status == 'resolved' }}>Résolus</option>
+      <option value="dismissed" {{ 'selected' if selected_status == 'dismissed' }}>Rejetés</option>
+    </select>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Cible</th>
+          <th>Motif</th>
+          <th>Signalé par</th>
+          <th>Date</th>
+          <th>Statut</th>
+          <th style="width:240px">Traiter</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reports %}
+        <tr>
+          <td>
+            <span class="badge text-bg-light">{{ {'product':'Produit','live':'Live','shop':'Boutique','user':'Utilisateur'}.get(r.target_type, r.target_type) }}</span>
+            <span class="text-muted small">#{{ r.target_id }}</span>
+          </td>
+          <td>
+            {{ r.reason }}
+            {% if r.message %}<div class="text-muted small">{{ r.message }}</div>{% endif %}
+          </td>
+          <td>{{ r.reporter_name or 'Anonyme' }}</td>
+          <td class="small">{{ r.created_at.strftime('%d/%m/%Y %H:%M') if r.created_at else '' }}</td>
+          <td>{{ m.report_badge(r.status) }}</td>
+          <td>
+            <form method="post" action="{{ url_for('reports.update_status', report_id=r.id) }}" class="d-flex gap-1">
+              <select class="form-select form-select-sm" name="status">
+                {% for st, lbl in [('open','Ouvert'),('reviewing','En cours'),('resolved','Résolu'),('dismissed','Rejeté')] %}
+                <option value="{{ st }}" {{ 'selected' if r.status == st }}>{{ lbl }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-sm btn-outline-primary">OK</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Aucun signalement.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

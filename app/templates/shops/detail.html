@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}{{ shop.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">{{ shop.name }} {{ m.shop_badge(shop.status) }}</h1>
+  <a href="{{ url_for('shops.list_shops') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Informations</h5>
+        <dl class="row mb-0 small">
+          <dt class="col-5 text-muted">Propriétaire</dt><dd class="col-7">{{ shop.owner_name }}</dd>
+          <dt class="col-5 text-muted">Téléphone</dt><dd class="col-7">{{ shop.owner_phone or '—' }}</dd>
+          <dt class="col-5 text-muted">WhatsApp</dt><dd class="col-7">{{ shop.whatsapp or '—' }}</dd>
+          <dt class="col-5 text-muted">Commune</dt><dd class="col-7">{{ shop.commune or '—' }}</dd>
+          <dt class="col-5 text-muted">Adresse</dt><dd class="col-7">{{ shop.address or '—' }}</dd>
+          <dt class="col-5 text-muted">Catégorie</dt><dd class="col-7">{{ shop.category or '—' }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <div class="card text-center shadow-sm"><div class="card-body py-3">
+          <div class="fs-4 fw-bold">{{ stats.orders }}</div>
+          <div class="text-muted small">Commandes</div>
+        </div></div>
+      </div>
+      <div class="col-6">
+        <div class="card text-center shadow-sm"><div class="card-body py-3">
+          <div class="fs-6 fw-bold">{{ m.price(stats.revenue) }}</div>
+          <div class="text-muted small">CA livré</div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">Modération</h6>
+        <form method="post" action="{{ url_for('shops.update_status', shop_id=shop.id) }}" class="d-flex gap-2">
+          <select class="form-select form-select-sm" name="status">
+            <option value="pending" {{ 'selected' if shop.status == 'pending' }}>En attente</option>
+            <option value="validated" {{ 'selected' if shop.status == 'validated' }}>Validée</option>
+            <option value="suspended" {{ 'selected' if shop.status == 'suspended' }}>Suspendue</option>
+          </select>
+          <button class="btn btn-sm btn-primary text-nowrap">Appliquer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">Produits ({{ products|length }})</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0 align-middle">
+          <thead><tr><th>Nom</th><th>Prix</th><th class="text-center">Stock</th><th class="text-center">Actif</th></tr></thead>
+          <tbody>
+            {% for p in products %}
+            <tr>
+              <td>{{ p.name }}</td>
+              <td>{{ m.price(p.price) }}</td>
+              <td class="text-center">{{ p.stock }}</td>
+              <td class="text-center">
+                {% if p.is_active %}<i class="bi bi-check-circle-fill text-success"></i>
+                {% else %}<i class="bi bi-x-circle text-muted"></i>{% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted py-3">Aucun produit.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Lives récents ({{ lives|length }})</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0 align-middle">
+          <thead><tr><th>Titre</th><th>Statut</th><th class="text-center">Vues</th></tr></thead>
+          <tbody>
+            {% for l in lives %}
+            <tr class="clickable-row" onclick="window.location='{{ url_for('lives.detail', live_id=l.id) }}'">
+              <td>{{ l.title }}</td>
+              <td>{{ m.live_badge(l.status) }}</td>
+              <td class="text-center">{{ l.viewer_count }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center text-muted py-3">Aucun live.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -6,52 +6,63 @@
 
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-4 col-lg-2">
+    <a class="text-decoration-none text-reset" href="{{ url_for('shops.list_shops') }}">
     <div class="card text-center shadow-sm">
       <div class="card-body">
-        <div class="fs-3 fw-bold">{{ stats.products }}</div>
-        <div class="text-muted small">Produits</div>
+        <div class="fs-3 fw-bold">{{ stats.shops }}</div>
+        <div class="text-muted small"><i class="bi bi-shop-window"></i> Boutiques</div>
+        {% if stats.pending_shops %}<div class="badge text-bg-warning">{{ stats.pending_shops }} à valider</div>{% endif %}
       </div>
     </div>
+    </a>
   </div>
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="card text-center shadow-sm">
+    <a class="text-decoration-none text-reset" href="{{ url_for('lives.list_lives', status='live') }}">
+    <div class="card text-center shadow-sm {{ 'border-danger' if stats.live_now > 0 }}">
       <div class="card-body">
-        <div class="fs-3 fw-bold">{{ stats.categories }}</div>
-        <div class="text-muted small">Catégories</div>
+        <div class="fs-3 fw-bold {{ 'text-danger' if stats.live_now > 0 }}">{{ stats.live_now }}</div>
+        <div class="text-muted small"><i class="bi bi-broadcast"></i> Lives en direct</div>
       </div>
     </div>
+    </a>
   </div>
   <div class="col-6 col-md-4 col-lg-2">
+    <a class="text-decoration-none text-reset" href="{{ url_for('orders.list_orders') }}">
     <div class="card text-center shadow-sm">
       <div class="card-body">
         <div class="fs-3 fw-bold">{{ stats.orders }}</div>
-        <div class="text-muted small">Commandes</div>
+        <div class="text-muted small"><i class="bi bi-receipt"></i> Commandes</div>
       </div>
     </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <a class="text-decoration-none text-reset" href="{{ url_for('deliveries.list_deliveries') }}">
+    <div class="card text-center shadow-sm">
+      <div class="card-body">
+        <div class="fs-3 fw-bold">{{ stats.active_deliveries }}</div>
+        <div class="text-muted small"><i class="bi bi-truck"></i> Livraisons en cours</div>
+      </div>
+    </div>
+    </a>
   </div>
   <div class="col-6 col-md-4 col-lg-2">
     <div class="card text-center shadow-sm">
       <div class="card-body">
-        <div class="fs-3 fw-bold">{{ stats.users }}</div>
-        <div class="text-muted small">Clients</div>
+        <div class="fs-6 fw-bold text-success">{{ m.price(stats.revenue) }}</div>
+        <div class="text-muted small"><i class="bi bi-cash-coin"></i> CA livré</div>
       </div>
     </div>
   </div>
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="card text-center shadow-sm">
+    <a class="text-decoration-none text-reset" href="{{ url_for('reports.list_reports', status='open') }}">
+    <div class="card text-center shadow-sm {{ 'border-danger' if stats.open_reports > 0 }}">
       <div class="card-body">
-        <div class="fs-3 fw-bold">{{ m.price(stats.revenue) }}</div>
-        <div class="text-muted small">Chiffre d'affaires</div>
+        <div class="fs-3 fw-bold {{ 'text-danger' if stats.open_reports > 0 }}">{{ stats.open_reports }}</div>
+        <div class="text-muted small"><i class="bi bi-flag"></i> Signalements</div>
       </div>
     </div>
-  </div>
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="card text-center shadow-sm {{ 'border-danger' if stats.low_stock > 0 }}">
-      <div class="card-body">
-        <div class="fs-3 fw-bold {{ 'text-danger' if stats.low_stock > 0 }}">{{ stats.low_stock }}</div>
-        <div class="text-muted small">Stock faible (≤5)</div>
-      </div>
-    </div>
+    </a>
   </div>
 </div>
 

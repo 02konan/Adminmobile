@@ -19,18 +19,29 @@
       </select>
     </div>
 
+    <div class="col-md-6">
+      <label class="form-label" for="shop_id">Boutique</label>
+      <select class="form-select" id="shop_id" name="shop_id">
+        <option value="">— Aucune (non commandable) —</option>
+        {% for s in shops %}
+          <option value="{{ s.id }}" {{ 'selected' if product and product.shop_id == s.id }}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+      <div class="form-text">Un produit doit être rattaché à une boutique pour être commandé dans l'app.</div>
+    </div>
+
     <div class="col-12">
       <label class="form-label" for="description">Description</label>
       <textarea class="form-control" id="description" name="description" rows="3">{{ product.description if product else '' }}</textarea>
     </div>
 
     <div class="col-md-3">
-      <label class="form-label" for="price">Prix (€)</label>
+      <label class="form-label" for="price">Prix (FCFA)</label>
       <input class="form-control" type="text" id="price" name="price" required
-             value="{{ product.price if product else '' }}">
+             value="{{ product.price|int if product else '' }}">
     </div>
     <div class="col-md-3">
-      <label class="form-label" for="old_price">Ancien prix (€, optionnel)</label>
+      <label class="form-label" for="old_price">Ancien prix (FCFA, optionnel)</label>
       <input class="form-control" type="text" id="old_price" name="old_price"
              value="{{ product.old_price if product and product.old_price else '' }}">
     </div>

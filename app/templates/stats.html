@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Statistiques{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Statistiques</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-5 fw-bold text-success">{{ m.price(totals.revenue) }}</div>
+      <div class="text-muted small">CA livré</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-3 fw-bold">{{ totals.delivered }}</div>
+      <div class="text-muted small">Commandes livrées</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-3 fw-bold">{{ totals.shops }}</div>
+      <div class="text-muted small">Boutiques</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card text-center shadow-sm"><div class="card-body">
+      <div class="fs-3 fw-bold">{{ totals.drivers }}</div>
+      <div class="text-muted small">Livreurs</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h6 class="card-title">Commandes par statut</h6>
+      <canvas id="ordersChart" height="200"></canvas>
+    </div></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h6 class="card-title">Livraisons par statut</h6>
+      <canvas id="deliveriesChart" height="200"></canvas>
+    </div></div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h6 class="card-title">Chiffre d'affaires par boutique (livré)</h6>
+      <canvas id="shopChart" height="220"></canvas>
+    </div></div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header">Top produits vendus</div>
+      <ul class="list-group list-group-flush">
+        {% for p in top_products %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ p.name }} <span class="text-muted small">· {{ p.shop_name or '—' }}</span></span>
+          <span class="badge text-bg-primary rounded-pill">{{ p.sold }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-center text-muted py-3">Aucune vente.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header">Performance des livreurs</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 align-middle">
+          <thead><tr><th>Livreur</th><th class="text-center">Livrées</th><th class="text-center">Total</th></tr></thead>
+          <tbody>
+            {% for d in top_drivers %}
+            <tr>
+              <td>{{ d.driver_name }}</td>
+              <td class="text-center"><span class="badge text-bg-success">{{ d.delivered }}</span></td>
+              <td class="text-center">{{ d.total }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center text-muted py-3">Aucun livreur.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const orderLabels = {
+    pending:'En attente', confirmed:'Confirmée', preparing:'En préparation',
+    ready:'Prête', picked_up:'Récupérée', delivering:'En livraison',
+    delivered:'Livrée', refused:'Refusée', cancelled:'Annulée'
+  };
+  const deliveryLabels = {
+    unassigned:'À affecter', assigned:'Affectée', picked_up:'Récupérée',
+    delivering:'En livraison', delivered:'Livrée', failed:'Échouée'
+  };
+  const palette = ['#0d6efd','#20c997','#ffc107','#fd7e14','#6610f2','#d63384','#198754','#dc3545','#6c757d'];
+
+  const ordersData = {{ orders_by_status | tojson }};
+  const deliveriesData = {{ deliveries_by_status | tojson }};
+  const shopData = {{ revenue_by_shop | tojson }};
+
+  new Chart(document.getElementById('ordersChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ordersData.map(r => orderLabels[r.status] || r.status),
+      datasets: [{ data: ordersData.map(r => r.n), backgroundColor: palette }]
+    },
+    options: { plugins: { legend: { position: 'right' } } }
+  });
+
+  new Chart(document.getElementById('deliveriesChart'), {
+    type: 'doughnut',
+    data: {
+      labels: deliveriesData.map(r => deliveryLabels[r.status] || r.status),
+      datasets: [{ data: deliveriesData.map(r => r.n), backgroundColor: palette }]
+    },
+    options: { plugins: { legend: { position: 'right' } } }
+  });
+
+  new Chart(document.getElementById('shopChart'), {
+    type: 'bar',
+    data: {
+      labels: shopData.map(r => r.shop_name),
+      datasets: [{ label: 'FCFA', data: shopData.map(r => Number(r.revenue)), backgroundColor: '#0d6efd' }]
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+  });
+</script>
+{% endblock %}

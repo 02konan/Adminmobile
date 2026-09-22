@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Lives{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Lives</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-4 col-md-3">
+    <select class="form-select" name="status" onchange="this.form.submit()">
+      <option value="">Tous les statuts</option>
+      <option value="live" {{ 'selected' if selected_status == 'live' }}>En direct</option>
+      <option value="scheduled" {{ 'selected' if selected_status == 'scheduled' }}>Programmés</option>
+      <option value="ended" {{ 'selected' if selected_status == 'ended' }}>Terminés</option>
+    </select>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Boutique</th>
+          <th class="text-center">Produits</th>
+          <th class="text-center">Messages</th>
+          <th class="text-center">Vues</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in lives %}
+        <tr class="clickable-row" onclick="window.location='{{ url_for('lives.detail', live_id=l.id) }}'">
+          <td class="fw-semibold">{{ l.title }}</td>
+          <td>{{ l.shop_name }}</td>
+          <td class="text-center">{{ l.product_count }}</td>
+          <td class="text-center">{{ l.message_count }}</td>
+          <td class="text-center">{{ l.viewer_count }}</td>
+          <td>{{ m.live_badge(l.status) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Aucun live.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
