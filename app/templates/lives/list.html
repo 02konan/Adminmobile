@@ -20,6 +20,7 @@
     <table class="table table-hover mb-0 align-middle">
       <thead>
         <tr>
+          <th></th>
           <th>Titre</th>
           <th>Boutique</th>
           <th class="text-center">Produits</th>
@@ -31,6 +32,13 @@
       <tbody>
         {% for l in lives %}
         <tr class="clickable-row" onclick="window.location='{{ url_for('lives.detail', live_id=l.id) }}'">
+          <td style="width:64px">
+            {% if l.cover_url %}
+              <img src="{{ l.cover_url }}" alt="" style="width:56px;height:40px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">
+            {% else %}
+              <span class="text-muted"><i class="bi bi-image"></i></span>
+            {% endif %}
+          </td>
           <td class="fw-semibold">{{ l.title }}</td>
           <td>{{ l.shop_name }}</td>
           <td class="text-center">{{ l.product_count }}</td>
@@ -39,7 +47,7 @@
           <td>{{ m.live_badge(l.status) }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="6" class="text-center text-muted py-4">Aucun live.</td></tr>
+        <tr><td colspan="7" class="text-center text-muted py-4">Aucun live.</td></tr>
         {% endfor %}
       </tbody>
     </table>
