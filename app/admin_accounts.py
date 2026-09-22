@@ -8,9 +8,15 @@ jamais se retrouver sans accès.
 
 import os
 
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import execute, get_db, query
+
+# Compte par défaut créé au tout premier lancement si rien n'est configuré.
+# À CHANGER après la première connexion (un avertissement s'affiche tant que
+# ce mot de passe est encore actif).
+DEFAULT_USERNAME = "admin"
+DEFAULT_PASSWORD = "divix2025"
 
 _ready = False
 
@@ -37,17 +43,48 @@ def ensure_ready():
             ) ENGINE=InnoDB
             """
         )
-    # Amorçage : si aucun admin en base, reprendre le compte des variables d'env.
+    # Amorçage : si aucun admin en base, créer un premier compte.
     if query("SELECT COUNT(*) AS n FROM admin_users", fetchone=True)["n"] == 0:
         env_user = os.environ.get("ADMIN_USERNAME")
         env_hash = os.environ.get("ADMIN_PASSWORD_HASH")
         if env_user and env_hash:
+            # Priorité au compte défini par variables d'environnement.
             execute(
                 "INSERT INTO admin_users (username, name, password_hash) "
                 "VALUES (%s, %s, %s)",
                 [env_user, "Administrateur", env_hash],
             )
+        else:
+            # Sinon, compte par défaut prêt à l'emploi (à changer ensuite).
+            execute(
+                "INSERT INTO admin_users (username, name, password_hash) "
+                "VALUES (%s, %s, %s)",
+                [
+                    DEFAULT_USERNAME,
+                    "Administrateur",
+                    generate_password_hash(DEFAULT_PASSWORD),
+                ],
+            )
     _ready = True
+
+
+def default_password_active():
+    """True si un compte utilise encore le mot de passe par défaut.
+
+    Défensif : ne casse jamais la page (retourne False si la base est
+    indisponible ou la table absente)."""
+    try:
+        admin = query(
+            "SELECT password_hash FROM admin_users "
+            "WHERE username = %s AND is_active = 1",
+            [DEFAULT_USERNAME],
+            fetchone=True,
+        )
+        return admin is not None and check_password_hash(
+            admin["password_hash"], DEFAULT_PASSWORD
+        )
+    except Exception:
+        return False
 
 
 def get_by_username(username):

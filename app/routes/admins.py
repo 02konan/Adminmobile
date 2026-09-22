@@ -22,6 +22,8 @@ def list_admins():
         "admins/list.html",
         admins=admin_accounts.list_admins(),
         current_id=session.get("admin_id"),
+        default_active=admin_accounts.default_password_active(),
+        default_username=admin_accounts.DEFAULT_USERNAME,
     )
 
 

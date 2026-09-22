@@ -28,11 +28,11 @@ def login_required(view):
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
+    admin_accounts.ensure_ready()
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
-        admin_accounts.ensure_ready()
         admin = admin_accounts.get_by_username(username)
         valid = admin is not None and check_password_hash(
             admin["password_hash"], password
@@ -49,7 +49,13 @@ def login():
 
         flash("Identifiants incorrects.", "danger")
 
-    return render_template("login.html", next=request.args.get("next", ""))
+    return render_template(
+        "login.html",
+        next=request.args.get("next", ""),
+        default_username=admin_accounts.DEFAULT_USERNAME,
+        default_password=admin_accounts.DEFAULT_PASSWORD,
+        show_default_hint=admin_accounts.default_password_active(),
+    )
 
 
 @auth_bp.route("/logout")
