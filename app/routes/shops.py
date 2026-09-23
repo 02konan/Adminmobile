@@ -82,3 +82,17 @@ def update_status(shop_id):
         execute("UPDATE shops SET status = %s WHERE id = %s", [status, shop_id])
         flash("Statut de la boutique mis à jour.", "success")
     return redirect(url_for("shops.detail", shop_id=shop_id))
+
+
+@shops_bp.route("/<int:shop_id>/appearance", methods=["POST"])
+@login_required
+def update_appearance(shop_id):
+    """Met à jour le logo et la bannière (image de couverture) de la boutique."""
+    logo_url = (request.form.get("logo_url") or "").strip() or None
+    cover_url = (request.form.get("cover_url") or "").strip() or None
+    execute(
+        "UPDATE shops SET logo_url = %s, cover_url = %s WHERE id = %s",
+        [logo_url, cover_url, shop_id],
+    )
+    flash("Apparence de la boutique mise à jour.", "success")
+    return redirect(url_for("shops.detail", shop_id=shop_id))

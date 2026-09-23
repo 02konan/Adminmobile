@@ -40,7 +40,7 @@
       </div>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-3">
       <div class="card-body">
         <h6 class="card-title">Modération</h6>
         <form method="post" action="{{ url_for('shops.update_status', shop_id=shop.id) }}" class="d-flex gap-2">
@@ -50,6 +50,25 @@
             <option value="suspended" {{ 'selected' if shop.status == 'suspended' }}>Suspendue</option>
           </select>
           <button class="btn btn-sm btn-primary text-nowrap">Appliquer</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">Apparence</h6>
+        {% if shop.cover_url %}
+        <img src="{{ shop.cover_url }}" alt="Bannière" class="img-fluid rounded mb-2"
+             style="height:90px;width:100%;object-fit:cover" onerror="this.style.display='none'">
+        {% endif %}
+        <form method="post" action="{{ url_for('shops.update_appearance', shop_id=shop.id) }}">
+          <label class="form-label small mb-1">Logo (URL)</label>
+          <input type="url" class="form-control form-control-sm mb-2" name="logo_url"
+                 value="{{ shop.logo_url or '' }}" placeholder="https://…/logo.jpg">
+          <label class="form-label small mb-1">Bannière / couverture (URL)</label>
+          <input type="url" class="form-control form-control-sm mb-2" name="cover_url"
+                 value="{{ shop.cover_url or '' }}" placeholder="https://…/banniere.jpg">
+          <button class="btn btn-sm btn-primary w-100">Enregistrer l'apparence</button>
         </form>
       </div>
     </div>
