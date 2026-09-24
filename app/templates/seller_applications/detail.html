@@ -22,6 +22,7 @@
           <dt class="col-5 text-muted">Catégorie</dt><dd class="col-7">{{ application.category or '—' }}</dd>
           <dt class="col-5 text-muted">Ville</dt><dd class="col-7">{{ application.city or '—' }}</dd>
           <dt class="col-5 text-muted">Pièce</dt><dd class="col-7">{{ 'Carte nationale (CNI)' if application.id_type == 'cni' else 'Passeport' }}</dd>
+          <dt class="col-5 text-muted">Conditions</dt><dd class="col-7">{{ ('Acceptées (v' ~ application.terms_version ~ ')') if application.terms_version else '—' }}</dd>
           <dt class="col-5 text-muted">Demande</dt><dd class="col-7">{{ application.created_at }}</dd>
         </dl>
         {% if application.review_note %}
