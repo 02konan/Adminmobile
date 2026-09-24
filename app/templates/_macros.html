@@ -49,3 +49,9 @@
   {% set labels = {'open': 'Ouvert', 'reviewing': 'En cours', 'resolved': 'Résolu', 'dismissed': 'Rejeté'} %}
   <span class="badge text-bg-{{ colors.get(status, 'secondary') }}">{{ labels.get(status, status) }}</span>
 {% endmacro %}
+
+{% macro seller_app_badge(status) %}
+  {% set colors = {'pending': 'warning', 'approved': 'success', 'rejected': 'secondary'} %}
+  {% set labels = {'pending': 'En attente', 'approved': 'Approuvée', 'rejected': 'Refusée'} %}
+  <span class="badge text-bg-{{ colors.get(status, 'secondary') }}">{{ labels.get(status, status) }}</span>
+{% endmacro %}

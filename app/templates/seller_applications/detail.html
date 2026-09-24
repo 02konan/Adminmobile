@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}{{ application.shop_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">{{ application.shop_name }} {{ m.seller_app_badge(application.status) }}</h1>
+  <a href="{{ url_for('seller_applications.list_applications') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Informations</h5>
+        <dl class="row mb-0 small">
+          <dt class="col-5 text-muted">Candidat</dt><dd class="col-7">{{ application.applicant_name }}</dd>
+          <dt class="col-5 text-muted">Téléphone</dt><dd class="col-7">{{ application.applicant_phone or '—' }}</dd>
+          <dt class="col-5 text-muted">E-mail</dt><dd class="col-7">{{ application.applicant_email or '—' }}</dd>
+          <dt class="col-5 text-muted">Rôle actuel</dt><dd class="col-7">{{ application.applicant_role }}</dd>
+          <dt class="col-5 text-muted">Catégorie</dt><dd class="col-7">{{ application.category or '—' }}</dd>
+          <dt class="col-5 text-muted">Ville</dt><dd class="col-7">{{ application.city or '—' }}</dd>
+          <dt class="col-5 text-muted">Pièce</dt><dd class="col-7">{{ 'Carte nationale (CNI)' if application.id_type == 'cni' else 'Passeport' }}</dd>
+          <dt class="col-5 text-muted">Demande</dt><dd class="col-7">{{ application.created_at }}</dd>
+        </dl>
+        {% if application.review_note %}
+        <div class="alert alert-secondary small mt-3 mb-0">Note : {{ application.review_note }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if application.status == 'pending' %}
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">Décision</h6>
+        <form method="post" action="{{ url_for('seller_applications.approve', app_id=application.id) }}" class="mb-2">
+          <button class="btn btn-success w-100"
+                  onclick="return confirm('Approuver ? Le compte deviendra vendeur et la boutique sera créée.')">
+            <i class="bi bi-check-circle"></i> Approuver et créer la boutique
+          </button>
+        </form>
+        <form method="post" action="{{ url_for('seller_applications.reject', app_id=application.id) }}">
+          <input type="text" name="note" class="form-control form-control-sm mb-2" placeholder="Motif du refus (optionnel)">
+          <button class="btn btn-outline-danger w-100">
+            <i class="bi bi-x-circle"></i> Refuser
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">Visuels de la boutique</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-4">
+            <div class="text-muted small mb-1">Logo</div>
+            {% if application.logo_url %}
+            <a href="{{ application.logo_url }}" target="_blank">
+              <img src="{{ application.logo_url }}" class="img-fluid rounded border" style="aspect-ratio:1;object-fit:cover">
+            </a>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </div>
+          <div class="col-8">
+            <div class="text-muted small mb-1">Bannière</div>
+            {% if application.cover_url %}
+            <a href="{{ application.cover_url }}" target="_blank">
+              <img src="{{ application.cover_url }}" class="img-fluid rounded border" style="height:110px;width:100%;object-fit:cover">
+            </a>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Pièces d'identité</div>
+      <div class="card-body">
+        <div class="row g-3">
+          {% for label, u in [('Recto', application.id_front_url), ('Verso', application.id_back_url), ('Selfie', application.selfie_url)] %}
+          <div class="col-4">
+            <div class="text-muted small mb-1">{{ label }}</div>
+            {% if u %}
+            <a href="{{ u }}" target="_blank">
+              <img src="{{ u }}" class="img-fluid rounded border" style="height:120px;width:100%;object-fit:cover">
+            </a>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <p class="text-muted small mt-3 mb-0">
+          <i class="bi bi-shield-lock"></i> Documents sensibles — à ne consulter que pour la vérification.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
