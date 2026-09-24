@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Candidatures livreur{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Candidatures livreur</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-4 col-md-3">
+    <select class="form-select" name="status" onchange="this.form.submit()">
+      <option value="">Tous les statuts</option>
+      <option value="pending" {{ 'selected' if selected_status == 'pending' }}>En attente</option>
+      <option value="approved" {{ 'selected' if selected_status == 'approved' }}>Approuvées</option>
+      <option value="rejected" {{ 'selected' if selected_status == 'rejected' }}>Refusées</option>
+    </select>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Candidat</th>
+          <th>Immatriculation</th>
+          <th>Zone</th>
+          <th>Pièce</th>
+          <th>Statut</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in applications %}
+        <tr class="clickable-row" onclick="window.location='{{ url_for('driver_applications.detail', app_id=a.id) }}'">
+          <td>{{ a.applicant_name }}<br><span class="text-muted small">{{ a.applicant_phone or '' }}</span></td>
+          <td class="fw-semibold">{{ a.plate_number }}</td>
+          <td>{{ a.city or '—' }}</td>
+          <td>{{ 'CNI' if a.id_type == 'cni' else 'Passeport' }}</td>
+          <td>{{ m.seller_app_badge(a.status) }}</td>
+          <td class="small text-muted">{{ a.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Aucune candidature.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

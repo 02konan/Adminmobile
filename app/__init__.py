@@ -7,6 +7,7 @@ from .routes.admins import admins_bp
 from .routes.categories import categories_bp
 from .routes.dashboard import dashboard_bp
 from .routes.deliveries import deliveries_bp
+from .routes.driver_applications import driver_apps_bp
 from .routes.lives import lives_bp
 from .routes.orders import orders_bp
 from .routes.products import products_bp
@@ -33,6 +34,7 @@ def create_app(config_class=Config):
     app.register_blueprint(deliveries_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(seller_apps_bp)
+    app.register_blueprint(driver_apps_bp)
     app.register_blueprint(stats_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(admins_bp)
@@ -44,7 +46,11 @@ def create_app(config_class=Config):
 
         if not session.get("admin_logged_in"):
             return {}
-        badges = {"open_reports_count": 0, "pending_seller_apps_count": 0}
+        badges = {
+            "open_reports_count": 0,
+            "pending_seller_apps_count": 0,
+            "pending_driver_apps_count": 0,
+        }
         try:
             row = db.query(
                 "SELECT COUNT(*) AS n FROM reports WHERE status = 'open'",
@@ -60,6 +66,15 @@ def create_app(config_class=Config):
                 fetchone=True,
             )
             badges["pending_seller_apps_count"] = row["n"] if row else 0
+        except Exception:
+            pass
+        try:
+            row = db.query(
+                "SELECT COUNT(*) AS n FROM driver_applications "
+                "WHERE status = 'pending'",
+                fetchone=True,
+            )
+            badges["pending_driver_apps_count"] = row["n"] if row else 0
         except Exception:
             pass
         return badges
