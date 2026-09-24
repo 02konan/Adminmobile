@@ -57,8 +57,14 @@
         </li>
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.blueprint == 'seller_applications' }}" href="{{ url_for('seller_applications.list_applications') }}">
-            <i class="bi bi-person-badge"></i> Candidatures
+            <i class="bi bi-person-badge"></i> Vendeurs
             {% if pending_seller_apps_count %}<span class="badge text-bg-warning rounded-pill">{{ pending_seller_apps_count }}</span>{% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ 'active' if request.blueprint == 'driver_applications' }}" href="{{ url_for('driver_applications.list_applications') }}">
+            <i class="bi bi-bicycle"></i> Livreurs
+            {% if pending_driver_apps_count %}<span class="badge text-bg-warning rounded-pill">{{ pending_driver_apps_count }}</span>{% endif %}
           </a>
         </li>
         <li class="nav-item">
