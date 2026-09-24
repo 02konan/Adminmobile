@@ -11,6 +11,7 @@ from .routes.lives import lives_bp
 from .routes.orders import orders_bp
 from .routes.products import products_bp
 from .routes.reports import reports_bp
+from .routes.seller_applications import seller_apps_bp
 from .routes.shops import shops_bp
 from .routes.stats import stats_bp
 from .routes.users import users_bp
@@ -31,6 +32,7 @@ def create_app(config_class=Config):
     app.register_blueprint(lives_bp)
     app.register_blueprint(deliveries_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(seller_apps_bp)
     app.register_blueprint(stats_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(admins_bp)
@@ -42,14 +44,25 @@ def create_app(config_class=Config):
 
         if not session.get("admin_logged_in"):
             return {}
+        badges = {"open_reports_count": 0, "pending_seller_apps_count": 0}
         try:
             row = db.query(
                 "SELECT COUNT(*) AS n FROM reports WHERE status = 'open'",
                 fetchone=True,
             )
-            return {"open_reports_count": row["n"] if row else 0}
+            badges["open_reports_count"] = row["n"] if row else 0
         except Exception:
-            return {"open_reports_count": 0}
+            pass
+        try:
+            row = db.query(
+                "SELECT COUNT(*) AS n FROM seller_applications "
+                "WHERE status = 'pending'",
+                fetchone=True,
+            )
+            badges["pending_seller_apps_count"] = row["n"] if row else 0
+        except Exception:
+            pass
+        return badges
 
     @app.route("/")
     def root():
