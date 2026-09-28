@@ -2,17 +2,41 @@
 {% import "_macros.html" as m %}
 {% block title %}Produits{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 mb-0">Produits</h1>
-  <a class="btn btn-dark" href="{{ url_for('products.new_product') }}">
-    <i class="bi bi-plus-lg"></i> Ajouter un produit
+
+<div class="d-flex justify-content-end mb-3">
+  <a class="btn btn-primary" href="{{ url_for('products.new_product') }}">
+    <i class="bi bi-plus-circle"></i> Produit
   </a>
 </div>
 
+<!-- Stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-head">
+      <span class="stat-label"><span class="stat-ic"><i class="bi bi-box-seam"></i></span> Total produits</span>
+    </div>
+    <div class="stat-value">{{ stats.total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-head">
+      <span class="stat-label"><span class="stat-ic"><i class="bi bi-box2"></i></span> Produits</span>
+      <span class="pill pill-danger">En rupture</span>
+    </div>
+    <div class="stat-value">{{ stats.out_of_stock }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-head">
+      <span class="stat-label"><span class="stat-ic"><i class="bi bi-box2"></i></span> Produits</span>
+      <span class="pill pill-warn">Stock faible</span>
+    </div>
+    <div class="stat-value">{{ stats.low_stock }}</div>
+  </div>
+</div>
+
 {% if orphan_count and shops %}
-<div class="card shadow-sm mb-3 border-warning">
+<div class="card mb-3" style="border-color:var(--warn)">
   <div class="card-body d-flex flex-wrap align-items-center gap-2">
-    <span class="me-1"><i class="bi bi-exclamation-triangle text-warning"></i>
+    <span class="me-1"><i class="bi bi-exclamation-triangle" style="color:var(--warn)"></i>
       <strong>{{ orphan_count }}</strong> produit(s) sans boutique — non commandables dans l'app.</span>
     <form class="d-flex gap-2 ms-auto" method="post" action="{{ url_for('products.assign_shop') }}"
           onsubmit="return confirm('Rattacher tous les produits sans boutique à cette boutique ?');">
@@ -26,7 +50,8 @@
 </div>
 {% endif %}
 
-<form class="row g-2 mb-3" method="get">
+<!-- Filtres -->
+<form class="row g-2 mb-4" method="get">
   <div class="col-sm-6 col-md-4">
     <input class="form-control" type="text" name="q" placeholder="Rechercher par nom ou id..." value="{{ search }}">
   </div>
@@ -48,60 +73,70 @@
     </select>
   </div>
   <div class="col-sm-2">
-    <button class="btn btn-outline-secondary" type="submit">Filtrer</button>
+    <button class="btn btn-outline-secondary w-100" type="submit">Filtrer</button>
   </div>
 </form>
 
-<div class="card shadow-sm">
-  <div class="table-responsive">
-    <table class="table table-hover mb-0 align-middle">
-      <thead>
-        <tr>
-          <th></th>
-          <th>ID</th>
-          <th>Nom</th>
-          <th>Catégorie</th>
-          <th>Boutique</th>
-          <th>Prix</th>
-          <th>Stock</th>
-          <th>Mis en avant</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in products %}
-        <tr>
-          <td><img class="product-thumb" src="{{ p.image_url }}" alt="" onerror="this.style.visibility='hidden'"></td>
-          <td><code>{{ p.id }}</code></td>
-          <td>{{ p.name }}</td>
-          <td>{{ p.category_name }}</td>
-          <td>
-            {% if p.shop_name %}{{ p.shop_name }}
-            {% else %}<span class="badge text-bg-warning">Aucune</span>{% endif %}
-          </td>
-          <td>
-            {{ m.price(p.price) }}
-            {% if p.old_price %}<span class="text-muted text-decoration-line-through small ms-1">{{ m.price(p.old_price) }}</span>{% endif %}
-          </td>
-          <td>
-            <span class="badge text-bg-{{ 'danger' if p.stock <= 5 else 'light text-dark' }}">{{ p.stock }}</span>
-          </td>
-          <td>{% if p.is_featured %}<i class="bi bi-star-fill text-warning"></i>{% endif %}</td>
-          <td class="text-end">
-            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('products.edit_product', product_id=p.id) }}">
-              <i class="bi bi-pencil"></i>
-            </a>
-            <form class="d-inline" method="post" action="{{ url_for('products.delete_product', product_id=p.id) }}"
-                  onsubmit="return confirm('Supprimer {{ p.name }} ?');">
-              <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+<div class="card">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-box-seam" style="color:var(--brand)"></i> Produits
+  </div>
+  <div class="card-body">
+    {% if products %}
+    <div class="product-grid">
+      {% for p in products %}
+      {% set discount = (100 - (p.price / p.old_price * 100))|round|int if p.old_price and p.old_price > 0 else 0 %}
+      <div class="pcard">
+        <div class="pcard-media">
+          <img src="{{ p.image_url }}" alt="{{ p.name }}" onerror="this.style.visibility='hidden'">
+          <div class="pcard-badges">
+            {% if discount > 0 %}<span class="badge-discount">-{{ discount }}%</span>{% endif %}
+            {% if p.old_price %}<span class="badge-price-old">{{ m.price(p.old_price) }}</span>{% endif %}
+          </div>
+          <div class="pcard-menu dropdown">
+            <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="{{ url_for('products.edit_product', product_id=p.id) }}">
+                <i class="bi bi-pencil"></i> Modifier</a></li>
+              <li>
+                <form method="post" action="{{ url_for('products.delete_product', product_id=p.id) }}"
+                      onsubmit="return confirm('Supprimer {{ p.name }} ?');">
+                  <button class="dropdown-item text-danger" type="submit"><i class="bi bi-trash"></i> Supprimer</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="pcard-body">
+          <div class="pcard-title">
+            <span class="pcard-name">{{ p.name }}</span>
+            {% if p.stock == 0 %}
+              <span class="chip chip-danger">Rupture</span>
+            {% else %}
+              <span class="chip chip-ok">En stock</span>
+            {% endif %}
+          </div>
+          <div class="pcard-cat">{{ p.category_name }}{% if p.shop_name %} · {{ p.shop_name }}{% endif %}</div>
+          <span class="stock-pill">{{ p.stock }}</span>
+          <div class="pcard-foot">
+            <form method="post" action="{{ url_for('products.toggle_active', product_id=p.id) }}">
+              <label class="switch">
+                <input type="checkbox" {{ 'checked' if p.is_active }} onchange="this.form.submit()">
+                <span class="track"></span>
+                <span class="switch-label">Active</span>
+              </label>
             </form>
-          </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="9" class="text-center text-muted py-4">Aucun produit trouvé.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            <span class="pcard-price">{{ m.price(p.price) }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted py-4 mb-0">Aucun produit trouvé.</p>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

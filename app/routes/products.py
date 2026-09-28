@@ -57,16 +57,46 @@ def list_products():
         "SELECT COUNT(*) AS n FROM products WHERE shop_id IS NULL", fetchone=True
     )["n"]
 
+    stats = {
+        "total": query("SELECT COUNT(*) AS n FROM products", fetchone=True)["n"],
+        "out_of_stock": query(
+            "SELECT COUNT(*) AS n FROM products WHERE stock = 0", fetchone=True
+        )["n"],
+        "low_stock": query(
+            "SELECT COUNT(*) AS n FROM products WHERE stock > 0 AND stock <= 5",
+            fetchone=True,
+        )["n"],
+    }
+
     return render_template(
         "products/list.html",
         products=products,
         categories=categories,
         shops=shops,
         orphan_count=orphan_count,
+        stats=stats,
         search=search,
         selected_category=category_id,
         selected_shop=shop_filter,
     )
+
+
+@products_bp.route("/<product_id>/toggle-active", methods=["POST"])
+@login_required
+def toggle_active(product_id):
+    """Active / désactive un produit (interrupteur de la grille)."""
+    row = query(
+        "SELECT is_active FROM products WHERE id = %s", [product_id], fetchone=True
+    )
+    if row is None:
+        flash("Produit introuvable.", "danger")
+    else:
+        new_value = 0 if row["is_active"] else 1
+        execute(
+            "UPDATE products SET is_active = %s WHERE id = %s",
+            [new_value, product_id],
+        )
+    return redirect(request.referrer or url_for("products.list_products"))
 
 
 @products_bp.route("/new", methods=["GET", "POST"])
