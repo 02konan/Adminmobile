@@ -189,3 +189,68 @@ a{color:var(--brand);}
   .menu-toggle{display:block;}
   .sidebar-backdrop.show{display:block;}
 }
+
+/* ============================================================
+   Harmonisation GLOBALE — toutes les pages du back-office
+   ============================================================ */
+
+/* En-têtes de page */
+.admin-content h1,
+.admin-content .h3{font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+.admin-content h1.h3{font-size:22px;}
+
+/* Boutons */
+.btn{border-radius:11px;font-weight:600;}
+.btn-sm{border-radius:9px;}
+.btn-success{background:var(--ok);border-color:var(--ok);}
+.btn-success:hover{filter:brightness(.94);}
+.btn-warning{background:var(--warn);border-color:var(--warn);color:#fff;}
+.btn-warning:hover{filter:brightness(.94);color:#fff;}
+.btn-danger{background:var(--danger);border-color:var(--danger);}
+.btn-outline-danger{color:var(--danger);border-color:var(--danger);}
+.btn-outline-primary{color:var(--brand);border-color:var(--brand);}
+
+/* Formulaires */
+.form-control,.form-select{
+  border-radius:11px;border:1px solid var(--line);
+  padding:.55rem .8rem;font-size:14px;
+}
+.form-control:focus,.form-select:focus{
+  border-color:var(--brand);box-shadow:0 0 0 3px rgba(47,79,224,.15);
+}
+.form-label{font-weight:600;font-size:13px;color:var(--muted);}
+
+/* Cartes */
+.card{background:#fff;}
+.card-body{padding:18px;}
+.card.shadow-sm{box-shadow:0 1px 3px rgba(20,30,60,.05)!important;}
+.card.text-center .fs-3{font-size:30px!important;font-weight:800;}
+
+/* Tableaux */
+.table{--bs-table-bg:transparent;margin-bottom:0;}
+.table > :not(caption) > * > *{padding:.85rem 1rem;border-bottom-color:var(--line);}
+.table thead th{background:#fafbff;}
+.table-hover > tbody > tr:hover > *{background-color:#f5f8ff;}
+.table code{color:var(--brand);background:rgba(47,79,224,.08);padding:2px 6px;border-radius:6px;}
+
+/* Badges Bootstrap -> pilules douces et cohérentes */
+.badge{border-radius:20px;font-weight:700;padding:.4em .75em;}
+.badge.text-bg-success{background:rgba(31,168,99,.15)!important;color:var(--ok)!important;}
+.badge.text-bg-warning{background:rgba(232,145,43,.16)!important;color:var(--warn)!important;}
+.badge.text-bg-danger{background:rgba(224,72,61,.15)!important;color:var(--danger)!important;}
+.badge.text-bg-secondary{background:#eef1f8!important;color:var(--muted)!important;}
+.badge.text-bg-info{background:rgba(47,79,224,.13)!important;color:var(--brand)!important;}
+.badge.text-bg-primary{background:rgba(47,79,224,.13)!important;color:var(--brand)!important;}
+.badge.text-bg-light{background:#eef1f8!important;color:var(--ink)!important;}
+
+/* Listes / dl / alertes / dropdowns */
+.list-group-item{border-color:var(--line);}
+dl.row dt{color:var(--muted);font-weight:600;}
+.alert{border-radius:12px;border:none;}
+.alert-success{background:rgba(31,168,99,.12);color:#12703f;}
+.alert-danger{background:rgba(224,72,61,.12);color:#a5271d;}
+.alert-warning{background:rgba(232,145,43,.14);color:#8a5410;}
+.dropdown-menu{border-radius:12px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(20,30,60,.12);}
+
+/* Liens de la zone de contenu (hors sidebar) */
+.admin-content a:not(.btn):not(.nav-link):not(.dropdown-item){color:var(--brand);}
