@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from ..auth import login_required
@@ -68,7 +70,12 @@ def detail(shop_id):
         )["t"],
     }
     return render_template(
-        "shops/detail.html", shop=shop, products=products, lives=lives, stats=stats
+        "shops/detail.html",
+        shop=shop,
+        products=products,
+        lives=lives,
+        stats=stats,
+        now=datetime.utcnow(),
     )
 
 
@@ -95,4 +102,55 @@ def update_appearance(shop_id):
         [logo_url, cover_url, shop_id],
     )
     flash("Apparence de la boutique mise à jour.", "success")
+    return redirect(url_for("shops.detail", shop_id=shop_id))
+
+
+PLAN_DAYS = {"monthly": 30, "quarterly": 90, "yearly": 365}
+
+
+@shops_bp.route("/<int:shop_id>/subscription", methods=["POST"])
+@login_required
+def update_subscription(shop_id):
+    """Active/prolonge ou révoque manuellement l'abonnement d'une boutique.
+
+    (En attendant le paiement mobile money automatique.)
+    """
+    action = request.form.get("action", "")
+    if action == "revoke":
+        execute(
+            "UPDATE shops SET subscription_plan = NULL, "
+            "subscription_expires_at = NULL WHERE id = %s",
+            [shop_id],
+        )
+        flash("Abonnement révoqué.", "warning")
+        return redirect(url_for("shops.detail", shop_id=shop_id))
+
+    plan = request.form.get("plan", "monthly")
+    days = PLAN_DAYS.get(plan)
+    if days is None:
+        flash("Offre invalide.", "danger")
+        return redirect(url_for("shops.detail", shop_id=shop_id))
+
+    # Prolonge depuis la date d'expiration si elle est future, sinon depuis maintenant.
+    execute(
+        """
+        UPDATE shops
+        SET subscription_plan = %s,
+            subscription_expires_at = DATE_ADD(
+                IF(subscription_expires_at IS NOT NULL
+                   AND subscription_expires_at > NOW(),
+                   subscription_expires_at, NOW()),
+                INTERVAL %s DAY)
+        WHERE id = %s
+        """,
+        [plan, days, shop_id],
+    )
+    # Trace un paiement "manuel" abouti.
+    execute(
+        "INSERT INTO subscription_payments "
+        "(shop_id, plan, amount, provider, status, days, paid_at) "
+        "VALUES (%s, %s, 0, 'manual', 'success', %s, NOW())",
+        [shop_id, plan, days],
+    )
+    flash(f"Abonnement activé/prolongé de {days} jours.", "success")
     return redirect(url_for("shops.detail", shop_id=shop_id))

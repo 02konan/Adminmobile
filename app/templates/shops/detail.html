@@ -54,6 +54,40 @@
       </div>
     </div>
 
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="card-title">Abonnement</h6>
+        {% set sub_active = shop.subscription_expires_at and shop.subscription_expires_at > now %}
+        <p class="small mb-2">
+          {% if sub_active %}
+            <span class="badge text-bg-success">Actif</span>
+            jusqu'au <strong>{{ shop.subscription_expires_at }}</strong>
+            {% if shop.subscription_plan %}({{ shop.subscription_plan }}){% endif %}
+          {% elif shop.subscription_expires_at %}
+            <span class="badge text-bg-secondary">Expiré</span>
+            le {{ shop.subscription_expires_at }}
+          {% else %}
+            <span class="badge text-bg-secondary">Aucun</span>
+          {% endif %}
+        </p>
+        <form method="post" action="{{ url_for('shops.update_subscription', shop_id=shop.id) }}" class="d-flex gap-2 mb-2">
+          <input type="hidden" name="action" value="activate">
+          <select class="form-select form-select-sm" name="plan">
+            <option value="monthly">Mensuel (+30 j)</option>
+            <option value="quarterly">Trimestriel (+90 j)</option>
+            <option value="yearly">Annuel (+365 j)</option>
+          </select>
+          <button class="btn btn-sm btn-success text-nowrap">Activer / Prolonger</button>
+        </form>
+        {% if shop.subscription_expires_at %}
+        <form method="post" action="{{ url_for('shops.update_subscription', shop_id=shop.id) }}">
+          <input type="hidden" name="action" value="revoke">
+          <button class="btn btn-sm btn-outline-danger w-100">Révoquer l'abonnement</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
     <div class="card shadow-sm">
       <div class="card-body">
         <h6 class="card-title">Apparence</h6>
