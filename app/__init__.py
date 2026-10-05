@@ -8,6 +8,7 @@ from .routes.categories import categories_bp
 from .routes.dashboard import dashboard_bp
 from .routes.deliveries import deliveries_bp
 from .routes.driver_applications import driver_apps_bp
+from .routes.feature_flags import feature_flags_bp
 from .routes.lives import lives_bp
 from .routes.orders import orders_bp
 from .routes.products import products_bp
@@ -38,6 +39,7 @@ def create_app(config_class=Config):
     app.register_blueprint(stats_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(admins_bp)
+    app.register_blueprint(feature_flags_bp)
 
     @app.context_processor
     def inject_badges():
