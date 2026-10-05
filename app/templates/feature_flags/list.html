@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Fonctionnalités{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h1 class="h3 mb-0">Fonctionnalités</h1>
+</div>
+<p class="text-muted mb-4">
+  Activez ou désactivez des fonctionnalités de l'application en temps réel,
+  sans publier de nouvelle version. Les changements s'appliquent en moins
+  d'une minute.
+</p>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Fonctionnalité</th>
+          <th>Détail</th>
+          <th class="text-center">État</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in flags %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ f.label }}</div>
+            <code class="text-muted small">{{ f.key }}</code>
+          </td>
+          <td class="text-muted small" style="max-width: 420px;">{{ f.hint }}</td>
+          <td class="text-center">
+            {% if f.enabled %}
+            <span class="badge text-bg-success">Activée</span>
+            {% else %}
+            <span class="badge text-bg-secondary">Désactivée</span>
+            {% endif %}
+            {% if not f.overridden %}
+            <div class="text-muted small mt-1">défaut</div>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <form class="d-inline" method="post"
+                  action="{{ url_for('feature_flags.toggle_flag', key=f.key) }}"
+                  onsubmit="return confirm('{{ 'Désactiver' if f.enabled else 'Activer' }} « {{ f.label }} » ?');">
+              <input type="hidden" name="enabled" value="{{ 0 if f.enabled else 1 }}">
+              {% if f.enabled %}
+              <button class="btn btn-sm btn-outline-danger" type="submit">
+                <i class="bi bi-toggle-on"></i> Désactiver
+              </button>
+              {% else %}
+              <button class="btn btn-sm btn-success" type="submit">
+                <i class="bi bi-toggle-off"></i> Activer
+              </button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center text-muted py-4">Aucune fonctionnalité.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
